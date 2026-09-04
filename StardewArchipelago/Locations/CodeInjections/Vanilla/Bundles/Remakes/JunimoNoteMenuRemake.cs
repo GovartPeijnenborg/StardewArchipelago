@@ -191,6 +191,36 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes
             snapToDefaultClickableComponent();
         }
 
+        public JunimoNoteMenuRemake(string noteTexturePath)
+            : base(Game1.uiViewport.Width / 2 - 640, Game1.uiViewport.Height / 2 - 360, 1280, 720, true)
+        {
+            _singleBundleMenu = true;
+            WhichArea = -1;
+            NoteTexture = Game1.temporaryContent.Load<Texture2D>(noteTexturePath);
+            TempSprites.Clear();
+            Inventory = new InventoryMenu(xPositionOnScreen + 128, yPositionOnScreen + 140, true, highlightMethod: HighlightObjects, capacity: 36, rows: 6, horizontalGap: 8, verticalGap: 8, drawSlots: false)
+            {
+                capacity = 36
+            };
+            for (var index = 0; index < Inventory.inventory.Count; ++index)
+            {
+                if (index >= Inventory.actualInventory.Count)
+                {
+                    Inventory.inventory[index].visible = false;
+                }
+            }
+            foreach (var clickableComponent in Inventory.GetBorder(InventoryMenu.BorderSide.Bottom))
+            {
+                clickableComponent.downNeighborID = -99998;
+            }
+            foreach (var clickableComponent in Inventory.GetBorder(InventoryMenu.BorderSide.Right))
+            {
+                clickableComponent.rightNeighborID = -99998;
+            }
+            Inventory.dropItemInvisibleButton.visible = false;
+            CanClick = true;
+        }
+
         public override void snapToDefaultClickableComponent()
         {
             if (SpecificBundlePage)
@@ -913,7 +943,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes
             }
         }
 
-        public void SwapPage(int direction)
+        public virtual void SwapPage(int direction)
         {
             if (direction > 0 && !AreaNextButton.visible || direction < 0 && !AreaBackButton.visible)
             {
@@ -1489,6 +1519,12 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes
             {
                 bundle.TryHoverAction(x, y);
             }
+
+            PerformHoverActionArrows(x, y);
+        }
+
+        protected virtual void PerformHoverActionArrows(int x, int y)
+        {
             if (!FromGameMenu)
             {
                 return;
@@ -1532,22 +1568,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes
                 {
                     tempSprite.draw(b, true);
                 }
-                if (FromGameMenu)
-                {
-                    if (AreaNextButton.visible)
-                    {
-                        AreaNextButton.draw(b);
-                    }
-                    if (AreaBackButton.visible)
-                    {
-                        AreaBackButton.draw(b);
-                    }
-                }
             }
             else
             {
                 DrawSpecificBundle(b);
             }
+
+            DrawArrows(b);
+
             if (GetRewardNameForArea(WhichArea) != "")
             {
                 SpriteText.drawStringWithScrollCenteredAt(b, GetRewardNameForArea(WhichArea), xPositionOnScreen + width / 2, Math.Min(yPositionOnScreen + height + 20, Game1.uiViewport.Height - 64 - 8));
@@ -1571,6 +1599,23 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes
                 drawHoverText(b, _singleBundleMenu || CanReadNote() || HoverText.Length <= 0 ? HoverText : "???", Game1.dialogueFont);
             }
             ScreenSwipe?.draw(b);
+        }
+
+        protected virtual void DrawArrows(SpriteBatch b)
+        {
+            if (SpecificBundlePage || !FromGameMenu)
+            {
+                return;
+            }
+
+            if (AreaNextButton.visible)
+            {
+                AreaNextButton.draw(b);
+            }
+            if (AreaBackButton.visible)
+            {
+                AreaBackButton.draw(b);
+            }
         }
 
         protected virtual void DrawSpecificBundle(SpriteBatch b)

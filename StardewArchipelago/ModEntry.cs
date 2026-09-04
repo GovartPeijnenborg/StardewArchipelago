@@ -101,6 +101,7 @@ namespace StardewArchipelago
         public ArchipelagoStateDto State { get; set; }
         public ILogger Logger => _logger;
         public BundlesManager BundlesManager => _bundlesManager;
+        public TesterFeatures TesterFeatures => _testerFeatures;
 
         public ModEntry() : base()
         {
@@ -314,7 +315,7 @@ namespace StardewArchipelago
             _tileSanityManager = new TileSanityManager(_harmony, _archipelago, _locationChecker, Monitor);
             _tileSanityManager.PatchWalk(this.Helper);
             var bank = new BankHandler(_archipelago);
-            _chatForwarder = new ChatForwarder(_logger, Monitor, _helper, _harmony, _archipelago, _giftHandler, _goalManager, trapExecutor.TileChooser, _tileSanityManager, bank);
+            _chatForwarder = new ChatForwarder(_logger, Monitor, _helper, _harmony, _archipelago, _giftHandler, _goalManager, trapExecutor, _tileSanityManager, bank);
             _questCleaner = new QuestCleaner(_locationChecker);
 
             _itemManager = new APItemManager(_logger, _helper, _harmony, _archipelago, _locationChecker, _stardewItemManager, _mail, trapExecutor, giftTrapManager, State.ItemsReceived);
@@ -386,15 +387,22 @@ namespace StardewArchipelago
             return result;
         }
 
-        private void OnButtonChanged(object sender, ButtonsChangedEventArgs e){
-            if (!Context.IsWorldReady) return;
+        private void OnButtonChanged(object sender, ButtonsChangedEventArgs e)
+        {
+            if (!Context.IsWorldReady)
+            {
+                return;
+            }
 
-            try {
-                if (Context.IsPlayerFree && Config.Controls.OpenMail.JustPressed()) {
+            try
+            {
+                if (Context.IsPlayerFree && Config.Controls.OpenMail.JustPressed())
+                {
                     MailboxHelper.TryGetNextMail();
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 _logger.LogError($"Error handling input, {ex.Message}");
             }
         }
@@ -472,6 +480,7 @@ namespace StardewArchipelago
 
             SeasonsRandomizer.ChangeMailKeysBasedOnSeasonsToDaysElapsed();
             SeasonsRandomizer.SendMailHardcodedForToday();
+            _mail.SendTrustFundLetter();
             ArchipelagoJunimoNoteMenu.OnDayStarted(_giftHandler.Receiver);
             _itemManager.TrapManager.TrapExecutor.DayUpdateDebt();
             _itemManager.TrapManager.TrapExecutor.DebuffApplier.LoadBuffs();
@@ -560,6 +569,8 @@ namespace StardewArchipelago
             {
                 _itemManager.ItemParser.TrapManager.DequeueTrap();
             }
+
+            _itemManager.TrapManager.TrapExecutor.FrameUpdate(e);
 
             MovementInjections.UpdateMove(e);
             MultiplayerVisionInjections.OnUpdateTicked(e);
