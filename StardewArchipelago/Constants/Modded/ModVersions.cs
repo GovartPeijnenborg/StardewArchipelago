@@ -30,7 +30,7 @@ namespace StardewArchipelago.Constants.Modded
             { ModNames.TRACTOR, $"4.24.{WILDCARD}" },
             //{ ModNames.WELLWICK, "1.0.0" },
             //{ ModNames.YOBA, "1.0.0" },
-            // { ModNames.SVE, $"1.14.{WILDCARD}" },
+            { ModNames.SVE, $"1.15.{WILDCARD}" },
             { ModNames.DISTANT_LANDS, $"2.2.5" },
             { ModNames.LACEY, $"1.6.{WILDCARD}" },
             //{ ModNames.BOARDING_HOUSE, "4.0.16" },
@@ -53,17 +53,17 @@ namespace StardewArchipelago.Constants.Modded
             {
                 ModNames.SVE, new List<ContentPatcherRequirement>()
                 {
-                    new(ModNames.AP_CP_SVE_PATCH, "2.1.x"),
-                    new(ModNames.AP_CP_SVE, "1.14.46"),
+                    //new(ModNames.AP_CP_SVE_PATCH, "2.1.x"),
+                    new(ModNames.AP_CP_SVE, "1.15.x"),
                 }
             },
         };
 
         public static readonly Dictionary<string, string> IncompatibleMods = new()
         {
-            {
-                ModNames.SVE, "Changes too much of the game to be added without randomizing it"
-            },
+            //{
+            //    ModNames.SVE, "Changes too much of the game to be added without randomizing it"
+            //},
             //{
             //    ModNames.EAST_SCARP, "Changes too much of the game"
             //},
