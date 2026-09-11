@@ -601,11 +601,6 @@ namespace StardewArchipelago.Locations.Patcher
             );
 
             _harmony.Patch(
-                original: AccessTools.Method(typeof(Bush), "shake"),
-                prefix: new HarmonyMethod(typeof(StoryQuestInjections), nameof(StoryQuestInjections.Shake_WinterMysteryBush_Prefix))
-            );
-
-            _harmony.Patch(
                 original: AccessTools.Method(typeof(Town), "mgThief_afterSpeech"),
                 prefix: new HarmonyMethod(typeof(StoryQuestInjections), nameof(StoryQuestInjections.MgThief_AfterSpeech_WinterMysteryFinished_Prefix))
             );
@@ -1259,6 +1254,16 @@ namespace StardewArchipelago.Locations.Patcher
 
         private void AddCropSanityLocations()
         {
+            _harmony.Patch(
+                original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.OnHarvestedForage)),
+                postfix: new HarmonyMethod(typeof(CropsanityInjections), nameof(CropsanityInjections.OnHarvestedForage_CheckForageLocation_Postfix))
+            );
+
+            _harmony.Patch(
+                original: AccessTools.Method(typeof(Bush), nameof(Bush.shake)),
+                prefix: new HarmonyMethod(typeof(CropsanityInjections), nameof(CropsanityInjections.Shake_VariousShakePatches_Prefix))
+            );
+
             if (_archipelago.SlotData.Cropsanity == Cropsanity.Disabled)
             {
                 return;

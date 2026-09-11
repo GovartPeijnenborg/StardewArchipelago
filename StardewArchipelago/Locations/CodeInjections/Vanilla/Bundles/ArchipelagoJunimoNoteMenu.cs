@@ -52,12 +52,12 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         private const string MORSHU_RICHER_CUE = "little_bit_richer";
 
         private static LogHandler _logger;
-        private static IModHelper _modHelper;
-        private static StardewArchipelagoClient _archipelago;
+        protected static IModHelper _modHelper;
+        protected static StardewArchipelagoClient _archipelago;
         private static ArchipelagoStateDto _state;
         private static ArchipelagoWalletDto _wallet;
         private static BankHandler _bank;
-        private static LocationChecker _locationChecker;
+        protected static LocationChecker _locationChecker;
         private static BundleReader _bundleReader;
         private static TrapManager _trapManager;
         private BundleCurrencyManager _currencyManager;
@@ -107,6 +107,11 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         }
 
         public ArchipelagoJunimoNoteMenu(ArchipelagoBundle b, string noteTexturePath) : base(b, noteTexturePath)
+        {
+            InitializeFields();
+        }
+
+        public ArchipelagoJunimoNoteMenu(string noteTexturePath) : base(noteTexturePath)
         {
             InitializeFields();
         }
@@ -384,14 +389,25 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             }
 
             var scoutedItem = _archipelago.ScoutStardewLocation(apLocationToScout, true);
-            var playerName = "Unknown Player";
-            var itemName = "Unknown Item";
+            var rewardText = $"Reward: Unknown";
             if (scoutedItem != null)
             {
-                itemName = scoutedItem.GetItemName(StringExtensions.TurnHeartsIntoStardewHearts);
-                playerName = scoutedItem.PlayerName;
+                var itemName = scoutedItem.GetItemName(StringExtensions.TurnHeartsIntoStardewHearts);
+                var playerName = scoutedItem.PlayerName;
+                rewardText = $"Reward: {playerName}'s {itemName}";
             }
-            var rewardText = $"Reward: {playerName}'s {itemName}";
+            else
+            {
+                if (ModEntry.Instance.TesterFeatures.NoScouting.Value >= 1)
+                {
+                    rewardText = "Reward: Not Scouted";
+                }
+                else
+                {
+                    rewardText = "Reward: Scout Failed";
+                }
+            }
+
             return rewardText;
         }
 
@@ -921,22 +937,28 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             var grandmaBackground = new BundleButton(grandmaButtonRect, NoteTexture, buttonBackgroundRectangle, buttonScale);
             var grandmaTextureRect = new Rectangle(0, 168, 16, 24);
             var grandmaRect = GetCenteredTexture(grandmaButtonRect, grandmaTextureRect, buttonScale, grandmaScale);
-            var grandmaButton = new BundleButton(grandmaRect, Game1.getCharacterFromName("Evelyn").Sprite.Texture, grandmaTextureRect, grandmaScale);
-            grandmaButton.myID = 795;
+
+            var evelyn = Game1.getCharacterFromName("Evelyn");
+            if (evelyn != null)
+            {
+                var grandmaButton = new BundleButton(grandmaRect, evelyn.Sprite.Texture, grandmaTextureRect, grandmaScale);
+                grandmaButton.myID = 795;
+                cookieButton.rightNeighborID = grandmaButton.myID;
+                grandmaButton.leftNeighborID = cookieButton.myID;
+                grandmaButton.rightNeighborID = REGION_PURCHASE_BUTTON;
+                ExtraButtons.Add(grandmaButton, _wallet.CookieClicker.UpgradeGrandma);
+            }
+
 
             cursorButton.leftNeighborID = REGION_BACK_BUTTON;
             cursorButton.rightNeighborID = cookieButton.myID;
             cookieButton.leftNeighborID = cursorButton.myID;
-            cookieButton.rightNeighborID = grandmaButton.myID;
-            grandmaButton.leftNeighborID = cookieButton.myID;
-            grandmaButton.rightNeighborID = REGION_PURCHASE_BUTTON;
 
             ExtraButtons.Add(cookieBackground, () => { });
             ExtraButtons.Add(cursorBackground, () => { });
             ExtraButtons.Add(grandmaBackground, () => { });
             ExtraButtons.Add(cookieButton, _wallet.CookieClicker.ClickCookie);
             ExtraButtons.Add(cursorButton, _wallet.CookieClicker.UpgradeCursor);
-            ExtraButtons.Add(grandmaButton, _wallet.CookieClicker.UpgradeGrandma);
         }
 
         private void SetUpMonstersButton()

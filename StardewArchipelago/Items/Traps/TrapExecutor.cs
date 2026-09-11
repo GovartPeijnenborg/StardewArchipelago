@@ -11,9 +11,11 @@ using StardewArchipelago.Archipelago.SlotData.SlotEnums;
 using StardewArchipelago.Constants.Vanilla;
 using StardewArchipelago.GameModifications.MultiSleep;
 using StardewArchipelago.Items.Traps.Shuffle;
+using StardewArchipelago.Locations.CodeInjections.Vanilla;
 using StardewArchipelago.Serialization;
 using StardewArchipelago.Stardew;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Buildings;
@@ -22,6 +24,7 @@ using StardewValley.GameData.MakeoverOutfits;
 using StardewValley.Internal;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Network;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
@@ -31,7 +34,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using StardewValley.Network;
+using StardewArchipelago.GameModifications.CodeInjections;
 using Object = StardewValley.Object;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
@@ -42,10 +45,11 @@ namespace StardewArchipelago.Items.Traps
         private static ILogger _logger;
         private static IModHelper _helper;
         private static StardewArchipelagoClient _archipelago;
-        private static TrapsStateDto _permanentState;
+        private static ArchipelagoStateDto _archipelagoState;
+        private static TrapsStateDto _trapsState;
         public static TrapDifficultyBalancer _difficultyBalancer;
 
-        private readonly DebtManager _debtManager;
+        public readonly DebtManager DebtManager;
         public readonly BombSpawner BombSpawner;
         public readonly TileChooser TileChooser;
         public readonly MonsterSpawner MonsterSpawner;
@@ -64,9 +68,10 @@ namespace StardewArchipelago.Items.Traps
             _logger = logger;
             _helper = modHelper;
             _archipelago = archipelago;
-            _permanentState = state.TrapsState;
+            _archipelagoState = state;
+            _trapsState = state.TrapsState;
             _difficultyBalancer = new TrapDifficultyBalancer();
-            _debtManager = new DebtManager(_permanentState);
+            DebtManager = new DebtManager(logger, archipelago, _difficultyBalancer, _trapsState);
             BombSpawner = new BombSpawner(_helper);
             TileChooser = new TileChooser();
             MonsterSpawner = new MonsterSpawner(TileChooser);
@@ -74,7 +79,7 @@ namespace StardewArchipelago.Items.Traps
             CowSpawner = new CowSpawner();
             DebrisSpawner = new DebrisSpawner(_logger);
             InventoryShuffler = new InventoryShuffler(_logger, giftHandler);
-            DebuffApplier = new BuffApplier(_permanentState);
+            DebuffApplier = new BuffApplier(_trapsState);
             Nudger = new ObjectNudger(_logger, _helper, _archipelago);
             _outfitChanger = new OutfitChanger(_logger, _helper);
             _activeSounds = new List<ICue>();
@@ -93,7 +98,7 @@ namespace StardewArchipelago.Items.Traps
             var isSafeLocation = Game1.player.currentLocation is (FarmHouse or IslandFarmHouse);
             var isSleepTime = Game1.player.isInBed.Value || Game1.player.FarmerSprite.isPassingOut() || Game1.player.passedOut;
             var isFestival = Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival;
-            var isInFade = Game1.fadeIn || Game1.fadeToBlack || Game1.globalFade || Game1.nonWarpFade;
+            var isInFade = Game1.fadeToBlack || Game1.globalFade || Game1.nonWarpFade; // || Game1.fadeIn;
             var isInMenu = Game1.activeClickableMenu != null || Game1.nextClickableMenu.Any();
 
             return !isSafeLocation && !isSleepTime && !isFestival && !isInFade && !isInMenu;
@@ -327,7 +332,7 @@ namespace StardewArchipelago.Items.Traps
             {
                 var debt = tax - maxSpend;
                 tax = maxSpend;
-                _permanentState.CurrentDebt += debt;
+                _trapsState.CurrentDebt += debt;
             }
             Game1.player.addUnearnedMoney(tax * -1);
             if (difficulty >= TrapItemsDifficulty.Nightmare)
@@ -351,7 +356,88 @@ namespace StardewArchipelago.Items.Traps
 
         public void DayUpdateDebt()
         {
-            _debtManager.DayUpdateDebt().FireAndForget();
+            DebtManager.DayUpdateDebt().FireAndForget();
+        }
+
+        public void FrameUpdate(UpdateTickedEventArgs e)
+        {
+            var farmer = Game1.player;
+            if (ShouldDoFireEffect(farmer))
+            {
+                DoFireEffect(e, farmer);
+            }
+        }
+
+        private bool ShouldDoFireEffect(Farmer farmer)
+        {
+            return DebuffApplier.HasPermanentBuff(Buffs.GoblinsCurse);
+        }
+
+        private void DoFireEffect(UpdateTickedEventArgs e, Farmer farmer)
+        {
+            var difficulty = _archipelago.SlotData.TrapItemsDifficulty;
+            if (difficulty < TrapItemsDifficulty.Hell)
+            {
+                return;
+            }
+
+            var delay = difficulty switch
+            {
+                TrapItemsDifficulty.Hell => 10,
+                TrapItemsDifficulty.Nightmare => 5,
+                TrapItemsDifficulty.Eldritch => 2,
+                _ => 1,
+            };
+
+            var range = delay / 2f;
+            var minDelay = delay - range;
+            var maxDelay = delay + range;
+
+            var randomDelay = (uint)Math.Round((Game1.random.NextDouble() * range * 2) + minDelay);
+            if (!e.IsMultipleOf(randomDelay))
+            {
+                return;
+            }
+
+            var distanceRange = difficulty switch
+            {
+                TrapItemsDifficulty.Hell => 32,
+                TrapItemsDifficulty.Nightmare => 128,
+                TrapItemsDifficulty.Eldritch => 256,
+                _ => 0,
+            };
+
+            var scaleRange = difficulty switch
+            {
+                TrapItemsDifficulty.Hell => 1,
+                TrapItemsDifficulty.Nightmare => 2,
+                TrapItemsDifficulty.Eldritch => 4,
+                _ => 0,
+            };
+
+            var animationIntervalRange = difficulty switch
+            {
+                TrapItemsDifficulty.Hell => 5,
+                TrapItemsDifficulty.Nightmare => 15,
+                TrapItemsDifficulty.Eldritch => 30,
+                _ => 0,
+            };
+
+            var numberOfLoopsRange = difficulty switch
+            {
+                TrapItemsDifficulty.Hell => 1,
+                TrapItemsDifficulty.Nightmare => 2,
+                TrapItemsDifficulty.Eldritch => 4,
+                _ => 0,
+            };
+
+            var offsetX = Game1.random.Next(-distanceRange, distanceRange);
+            var offsetY = Game1.random.Next(-distanceRange, distanceRange);
+            var scale = 4f + (float)(((Game1.random.NextDouble() - 0.5f) * 2) * scaleRange);
+            // var animationInterval = 60 + Game1.random.Next(-animationIntervalRange, animationIntervalRange);
+            var numberOfLoops = 4 + Game1.random.Next(-numberOfLoopsRange, numberOfLoopsRange);
+
+            FarmerInjections.PlayFireFeetEffect(farmer, offsetX, offsetY, scale, 60, numberOfLoops);
         }
 
         public void SendCrows()
@@ -534,7 +620,7 @@ namespace StardewArchipelago.Items.Traps
                 player.friendshipData[name].LastGiftDate = new WorldDate(Game1.Date);
                 Game1.player.changeFriendship(friendshipLoss, npc);
             }
-            _permanentState.DaysShunRemaining += shunningDays;
+            _trapsState.DaysShunRemaining += shunningDays;
         }
 
         private static bool _isShunMovement = false;
@@ -579,7 +665,7 @@ namespace StardewArchipelago.Items.Traps
 
         private static bool ShouldShun(NPC npc)
         {
-            if (_permanentState.DaysShunRemaining <= 0)
+            if (_trapsState.DaysShunRemaining <= 0)
             {
                 return false;
             }
@@ -1469,6 +1555,10 @@ namespace StardewArchipelago.Items.Traps
             {
                 var itemToSpoil = allItemsWithQuality[Game1.random.Next(allItemsWithQuality.Count)];
                 itemToSpoil.Quality -= 1;
+                if (itemToSpoil.Quality == 3)
+                {
+                    itemToSpoil.Quality -= 1;
+                }
                 spoilsRemaining -= itemToSpoil.Stack;
                 allItemsWithQuality = FilterItemsThatCanSpoil(allItemsWithQuality, spoilsRemaining);
             }
@@ -1842,14 +1932,93 @@ namespace StardewArchipelago.Items.Traps
             }
         }
 
+        public void BackToSchool()
+        {
+            RemoveSkillProfessions();
+            ReduceExperience();
+            RandomizeProfessions();
+        }
+
+        private void ReduceExperience()
+        {
+            var difficulty = _archipelago.SlotData.TrapItemsDifficulty;
+            var percentToLose = _difficultyBalancer.ExperiencePercentToLose[difficulty];
+            var currentXp = GetCurrentXp();
+            var totalXp = GetTotalXp(currentXp);
+            var xpToLose = (int)Math.Max(0, Math.Round(totalXp * percentToLose));
+            var step = 1000;
+            while (xpToLose > 0 && step > 0)
+            {
+                while (xpToLose < step * 2 && step >= 10)
+                {
+                    step /= 10;
+                }
+
+                var randomSkill = currentXp.Keys.ToArray()[Game1.random.Next(currentXp.Keys.Count)];
+                var currentXpInSkill = currentXp[randomSkill];
+                if (currentXpInSkill <= 0)
+                {
+                    continue;
+                }
+                var xpToLoseInSkill = step;
+                if (xpToLoseInSkill > currentXpInSkill)
+                {
+                    xpToLoseInSkill = currentXpInSkill;
+                }
+                var newXpInSkill = currentXpInSkill - xpToLoseInSkill;
+                xpToLose -= xpToLoseInSkill;
+                currentXp[randomSkill] = newXpInSkill;
+
+                var remainingTotalXp = GetTotalXp(currentXp);
+                if (remainingTotalXp <= 0)
+                {
+                    break;
+                }
+            }
+
+            SetCurrentXp(currentXp);
+        }
+
+        private Dictionary<int, int> GetCurrentXp()
+        {
+            if (_archipelago.SlotData.SkillProgression == SkillsProgression.Vanilla)
+            {
+                return Game1.player.experiencePoints.ToDictionary(x => x, x => Game1.player.experiencePoints[x]);
+            }
+            else
+            {
+                return SkillInjections.GetArchipelagoExperience();
+            }
+        }
+
+        private int GetTotalXp(Dictionary<int, int> currentXp)
+        {
+            return currentXp.Sum(x => x.Value);
+        }
+
+        private void SetCurrentXp(Dictionary<int, int> currentXp)
+        {
+            if (_archipelago.SlotData.SkillProgression == SkillsProgression.Vanilla)
+            {
+                foreach (var (skill, xpInSkill) in currentXp)
+                {
+                    Game1.player.experiencePoints[skill] = xpInSkill;
+                }
+            }
+            else
+            {
+                SkillInjections.SetArchipelagoExperience(currentXp);
+            }
+        }
+
         public void RandomizeProfessions()
         {
             var hasProfessions = Game1.player.professions.Any() &&
-                                 (Game1.player.FarmingLevel >= 5 ||
-                                  Game1.player.FishingLevel >= 5 ||
-                                  Game1.player.ForagingLevel >= 5 ||
-                                  Game1.player.MiningLevel >= 5 ||
-                                  Game1.player.CombatLevel >= 5);
+                             (Game1.player.FarmingLevel >= 5 ||
+                              Game1.player.FishingLevel >= 5 ||
+                              Game1.player.ForagingLevel >= 5 ||
+                              Game1.player.MiningLevel >= 5 ||
+                              Game1.player.CombatLevel >= 5);
             if (!hasProfessions)
             {
                 return;
@@ -1897,16 +2066,16 @@ namespace StardewArchipelago.Items.Traps
             RandomizeSkillProfessions(level, new[] { 24, 25 }, new[] { 26, 27 }, new[] { 28, 29 });
         }
 
+        private static void RemoveSkillProfessions()
+        {
+            Game1.player.professions.Clear();
+        }
+
         private static void RandomizeSkillProfessions(int level, int[] level5Professions, int[] level10Professions1, int[] level10Professions2)
         {
             if (level < 5)
             {
                 return;
-            }
-
-            foreach (var profession in level5Professions)
-            {
-                Game1.player.professions.Remove(profession);
             }
 
             var level5Profession = level5Professions[Game1.random.Next(level5Professions.Length)];
@@ -1918,12 +2087,6 @@ namespace StardewArchipelago.Items.Traps
             }
 
             var level10Professions = level5Profession == level5Professions.First() ? level10Professions1 : level10Professions2;
-
-            foreach (var profession in level10Professions1.Union(level10Professions2))
-            {
-                Game1.player.professions.Remove(profession);
-            }
-
             var level10Profession = level10Professions[Game1.random.Next(level10Professions.Length)];
             Game1.player.professions.Add(level10Profession);
         }

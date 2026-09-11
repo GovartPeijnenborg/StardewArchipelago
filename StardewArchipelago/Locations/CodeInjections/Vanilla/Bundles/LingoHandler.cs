@@ -1,13 +1,14 @@
-﻿using StardewArchipelago.Constants.Vanilla;
+﻿using Microsoft.Xna.Framework;
+using StardewArchipelago.Constants.Vanilla;
+using StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes;
 using StardewValley;
 using StardewValley.Menus;
+using StardewValley.Minigames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles.Remakes;
 
 namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
 {
@@ -239,6 +240,16 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
 
         public bool IsValidItemForThisIngredientDescription(Item item, BundleIngredientDescription ingredient, int ingredientIndex)
         {
+            if (item == null)
+            {
+                return false;
+            }
+
+            var drawnItemId = _drawnItemIds[ingredientIndex];
+            if (item.QualifiedItemId == drawnItemId)
+            {
+                return true; // This should only happen when highlighting and picking up, not actual donations
+            }
             return CanSlotAcceptItem(_slots[ingredientIndex], item);
         }
 

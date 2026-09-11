@@ -40,6 +40,17 @@ namespace StardewArchipelago.Items.Traps
             { TrapItemsDifficulty.Eldritch, 2 },
         };
 
+        public Dictionary<TrapItemsDifficulty, double> InterestRates = new()
+        {
+            { TrapItemsDifficulty.NoTraps, 0 },
+            { TrapItemsDifficulty.Easy, 0.01 },
+            { TrapItemsDifficulty.Medium, 0.02 },
+            { TrapItemsDifficulty.Hard, 0.05 },
+            { TrapItemsDifficulty.Hell, 0.10 },
+            { TrapItemsDifficulty.Nightmare, 0.15 },
+            { TrapItemsDifficulty.Eldritch, 0.20 },
+        };
+
         public Dictionary<TrapItemsDifficulty, TeleportDestination> TeleportDestinations = new()
         {
             { TrapItemsDifficulty.NoTraps, TeleportDestination.None },
@@ -533,6 +544,17 @@ namespace StardewArchipelago.Items.Traps
             { TrapItemsDifficulty.Hell, Traps.MakeoverTargets.OutfitServices | Traps.MakeoverTargets.Eyes | Traps.MakeoverTargets.Hair },
             { TrapItemsDifficulty.Nightmare, Traps.MakeoverTargets.Clothes | Traps.MakeoverTargets.PhysicalAppearance },
             { TrapItemsDifficulty.Eldritch, Traps.MakeoverTargets.RandomizeEntireAppearance },
+        };
+
+        public Dictionary<TrapItemsDifficulty, double> ExperiencePercentToLose = new()
+        {
+            { TrapItemsDifficulty.NoTraps, 0 },
+            { TrapItemsDifficulty.Easy, 0.1 },
+            { TrapItemsDifficulty.Medium, 0.2 },
+            { TrapItemsDifficulty.Hard, 0.3 },
+            { TrapItemsDifficulty.Hell, 0.5 },
+            { TrapItemsDifficulty.Nightmare, 0.8 },
+            { TrapItemsDifficulty.Eldritch, 0.95 },
         };
 
         public Dictionary<TrapItemsDifficulty, float> EnergyToRemove = new()
