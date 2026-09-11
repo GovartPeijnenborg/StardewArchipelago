@@ -61,9 +61,9 @@ namespace StardewArchipelago.Constants.Modded
 
         public static readonly Dictionary<string, string> IncompatibleMods = new()
         {
-            //{
-            //    ModNames.SVE, "Changes too much of the game to be added without randomizing it"
-            //},
+            {
+                ModNames.SVE, "Changes too much of the game to be added without randomizing it"
+            },
             //{
             //    ModNames.EAST_SCARP, "Changes too much of the game"
             //},
