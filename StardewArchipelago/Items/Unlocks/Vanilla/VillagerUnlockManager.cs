@@ -24,7 +24,10 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
             foreach (var (characterId, characterData) in Game1.characterData)
             {
                 var apName = VillagerExistenceInjections.GetArrivalItem(characterId);
-                unlocks.Add(apName, (x) => SendVillagerArrivalLetter(x, characterId));
+                if(!unlocks.ContainsKey(apName))
+                {
+                    unlocks.Add(apName, (x) => SendVillagerArrivalLetter(x, characterId));
+                }
             }
         }
 
