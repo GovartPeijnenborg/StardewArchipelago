@@ -43,6 +43,7 @@ In this guide, we will be separating bundles into 3 distinct categories, and pro
 - **Dr Seuss Bundle**
 - **Eg Bundle**
 - **Emmalution Bundle**
+- **Finders Keeper Bundle**
 - **Frazzleduck Bundle**
 - **Hats Off To You Bundle**
 - **Hurricane Tortilla Bundle**
@@ -52,7 +53,9 @@ In this guide, we will be separating bundles into 3 distinct categories, and pro
 - **Look At These Chickens Bundle**
 - **Minecraft Bundle**
 - **Not The Bees Bundle**
+- **Numbers Bundle**
 - **Obelisks Bundle**
+- **Peace Bundle**
 - **Potato Bundle**
 - **Rick Bundle**
 - **Romance Bundle**
@@ -148,6 +151,40 @@ If you excluded Ginger Island, someone in Pelican Town will give you the remote
 If you included Ginger Island, after completing "The Pirate's Wife", talk to George. He ends up not liking the complicated remote, and donates it to the Community Center for you.
 
 If you excluded Ginger Island, talk to George, he will give you a remote to donate on your own.
+
+</details>
+</ul>
+</details>
+
+<details>
+<summary><h3>Camping Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+You need a tent kit to complete this bundle
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+You need a tent kit to go camping
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+The tent kit usage conditions were lessened to make this bundle possible
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+You need to spend the night in the community center, using a Tent Kid, to complete this bundle
 
 </details>
 </ul>
@@ -434,6 +471,51 @@ Once you unlock apple trees, you should immediately plant at least 2, so your ow
 Once you have enough, you can simply donate them in a single stack.
 
 If you reach day 999, the bundle will stop growing due to the technical limitations of the max stack size of apples.
+
+</details>
+</ul>
+</details>
+
+<details>
+<summary><h3>Error Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+This bundle requires an error
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+Errors are displayed in Red in SMAPI
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+A disconnection will not work because it happens while disconnected
+
+</details>
+
+<details>
+<summary><h4>Hint #4</h4></summary>
+
+Any error, other than a disconnection, will work
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+Causing any mod error at all (except a disconnect) that displays in SMAPI while in-game will trigger the bundle.
+
+Many mods cause errors when bugs occur, or incompatibilities with each other. This includes Archipelago itself, it is entirely possible to complete this bundle by accident.
+
+Still, the easiest way to complete it that I know of, is to simply type an invalid command in SMAPI. For example, the command `error` will cause a harmless error.
 
 </details>
 </ul>
@@ -752,6 +834,78 @@ You must donate the ingredients to craft the item that shows up in the bundle, r
 </details>
 
 <details>
+<summary><h3>Lingo Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+This Bundle is based on the puzzle game LINGO.
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+The items you see are not actually the items being requested. You need to find items that are related.
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+For each of the items being requested, the color of the box and the height at which the box is placed, matters when figuring out the relationship between the displayed item and the required item.
+
+</details>
+
+<details>
+<summary><h4>Hint #4</h4></summary>
+
+If you donate a wrong item, it will be refunded to you, and the game will give you a hint as to what to look for.
+
+</details>
+
+<details>
+<summary><h4>Hint #5</h4></summary>
+
+The colors mean:
+- Red: Remove
+- Blue: Add
+- White: Keep the same
+<br/>
+The heights mean:
+- High: Pronunciation of the item
+- Middle: Spelling of the item
+- Bottom: Nature of the item
+
+</details>
+
+<details>
+<summary><h4>Hint #6</h4></summary>
+
+The full matrix is:
+|        | $${\color{red}{Red}}$$      | White               | $${\color{blue}{Blue}}$$    |
+|--------|-----------------------------|---------------------|-----------------------------|
+| High   | Not Applicable              | Pronounced the same | Not Applicable              |
+| Middle | Remove One Letter           | Spelled the same    | Add One Letter              |
+| Bottom | Find the part to this whole | Same Item           | Find the whole to this part | 
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+|        | $${\color{red}{Red}}$$                                                                                                                                                                                                                                                                                                                   | White              | $${\color{blue}{Blue}}$$                                                                                                                                                                                                                                                                                                                  |
+|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| High   | Not Applicable                                                                                                                                                                                                                                                                                                                           | Shirt <-> Shorts   | Not Applicable                                                                                                                                                                                                                                                                                                                            |
+| Middle | Acorn -> Corn <br> Coral -> Coal <br> Ancient Seeds -> Ancient Seed <br> (Frozen) Tear -> (Green) Tea                                                                                                                                                                                                                                    | Any item -> Itself | Corn -> Acorn <br> Coral -> Coral <br> Ancient Seed -> Ancient Seeds <br> (Green) Tea -> (Frozen) Tear                                                                                                                                                                                                                                    |
+| Bottom | Any Bar -> Related Source Ore <br> Blueberry Tart -> Blueberry <br> Blackberry Cobbler -> Blackberry <br> Carp Surprise -> Carp <br> Salmon Dinner -> Salmon <br> Rhubarb Pie -> Rhubarb <br> Fried Eel -> Eel <br> Rice Pudding -> Rice <br> Pumpkin Soup -> Pumpkin <br> Cranberry Sauce -> Cranberries <br> Shrimp Cocktail -> Shrimp | Any item -> Itself | Any Ore -> Related Smelted Bar <br> Blueberry -> Blueberry Tart <br> Blackberry -> Blackberry Cobbler <br> Carp -> Carp Surprise <br> Salmon -> Salmon Dinner <br> Rhubarb -> Rhubarb Pie <br> Eel -> Fried Eel <br> Rice -> Rice Pudding <br> Pumpkin -> Pumpkin Soup <br> Cranberries -> Cranberry Sauce <br> Shrimp -> Shrimp Cocktail | 
+
+</details>
+</ul>
+</details>
+
+<details>
 <summary><h3>Loser Club Bundle</h3></summary>
 <ul>
 
@@ -780,6 +934,47 @@ You don't need a tuna specifically, any fish will do
 <summary><h4>Solution</h4></summary>
 
 You must donate any fish that you found in a trash can specifically.
+
+</details>
+</ul>
+</details>
+
+<details>
+<summary><h3>Looney Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+This bundle is based on Looney Tunes comics, specifically Wile E Coyote's elaborate attempts at capturing the Road Runner.
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+You will need an Anvil or this bundle
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+Be careful not to hurt yourself with the Anvil
+
+</details>
+
+<details>
+<summary><h4>Hint #4</h4></summary>
+
+You should try to drop the Anvil on the Road Runner from a significant height.
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+Place the Anvil on the bundle image, not the road runner itself. It will slowly fall down towards the Road Runner.
 
 </details>
 </ul>
@@ -821,6 +1016,47 @@ In stardew, mermaids are typically associated to a specific song that has 5 note
 <summary><h4>Solution</h4></summary>
 
 You must donate the items in the order [1-5-4-2-3] (left to right) to play the mermaid song.
+
+</details>
+</ul>
+</details>
+
+<details>
+<summary><h3>Morshu Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+This bundle is based on Morshu's Store in the game "Link: The Faces of Evil"
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+You can see the shop in this video: https://youtu.be/iPn3LIe2e3w?t=115 (Timestamp: 1:55)
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+Morshu sells 3 items. Oil, Rope, Bombs. But he requires payment...
+
+</details>
+
+<details>
+<summary><h4>Hint #4</h4></summary>
+
+You must pay the correct currency and amount for the items. The audio cue should help.
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+All 3 items actually cost rubies. 5 Rubies for the oil, 10 rubies for the rope, and 20 rubies for the bomb. You will receive the item as part of the transaction.
 
 </details>
 </ul>
@@ -1393,6 +1629,40 @@ Once you bring an item, TheAlGoreRhythm will teach you that this item is stackab
 <summary><h4>Solution</h4></summary>
 
 You simply need a stack of 2 of the item, to donate it to the bundle, just to show it is stackable.
+
+</details>
+</ul>
+</details>
+
+<details>
+<summary><h3>Yeehaw Bundle</h3></summary>
+<ul>
+
+<details>
+<summary><h4>Hint #1</h4></summary>
+
+You need to be someone who says "Yeehaw!" to complete this bundle
+
+</details>
+
+<details>
+<summary><h4>Hint #2</h4></summary>
+
+Cowboys are commonly associated with the phrase "Yeehaw!"
+
+</details>
+
+<details>
+<summary><h4>Hint #3</h4></summary>
+
+Cowboys generally wear a specific style of hat
+
+</details>
+
+<details>
+<summary><h4>Solution</h4></summary>
+
+If you wear a cowboy hat, you can complete the bundle
 
 </details>
 </ul>
